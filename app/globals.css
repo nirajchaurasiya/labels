@@ -17,8 +17,8 @@
   white-space: nowrap;
   overflow: hidden;
   box-sizing: border-box;
-  animation: marquee 20s linear infinite;
-  /* width: 100%; */
+  animation: marquee 40s linear infinite;
+  width: 100%;
 }
 
 @keyframes marquee {

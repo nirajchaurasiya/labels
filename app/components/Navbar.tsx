@@ -25,11 +25,17 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 bg-white shadow-md">
       {/* Top Info Bar */}
       <div className="text-white text-xs overflow-hidden gold-theme-bg">
-        <div className="whitespace-nowrap animate-marquee py-1 px-2">
-          <span className="mx-4">2621 E Nettleton</span>
-          <span className="mx-4">Chardaywoods@gmail.com</span>
-          <span className="mx-4">870-627-1281</span>
-          <span className="mx-4">Labels</span>
+        <div
+          className="whitespace-nowrap animate-marquee py-1 px-2 md:gap-12 gap-7 font-semibold"
+          style={{ display: "flex" }}
+        >
+          <p className="mx-4"> • Color Matching Technology</p>
+          <p className="mx-4"> • Super Fast Turnaround</p>
+          <p className="mx-4"> • All Orders Ship in 1-2 Business Days</p>
+          <p className="mx-4"> • 2621 E Nettleton</p>
+          <p className="mx-4"> • Chardaywoods@gmail.com</p>
+          <p className="mx-4"> • 870-627-1281</p>
+          <p className="mx-4"> • Labels</p>
         </div>
       </div>
 
