@@ -108,7 +108,7 @@ export default function Navbar() {
         </li>
         <li>
           <Link
-            href="/shop-now"
+            href="/services/all"
             className="gold-theme-btn p-2 rounded-md text-white "
           >
             <button className="cursor-pointer">Shop Now</button>

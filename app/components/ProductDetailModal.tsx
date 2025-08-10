@@ -1,33 +1,40 @@
 "use client";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+const sizes = [
+  { size: "2'' x2''", cost: 1.35 },
+  { size: "3'' x3''", cost: 1.35 },
+  { size: "4'' x2''", cost: 1.0 },
+  { size: "4'' x4''", cost: 1.8 },
+  { size: "5'' x3''", cost: 1.8 },
+  { size: "5'' x5''", cost: 2.25 },
+  { size: "6'' x6''", cost: 2.7 },
+  { size: "7'' x7''", cost: 3.5 },
+  { size: "8'' x8''", cost: 4.0 },
+  { size: "9'' x9''", cost: 4.5 },
+  { size: "9'' x11''", cost: 5.5 },
+  { size: "11'' x5''", cost: 4.25 },
+  { size: "11'' x11''", cost: 7.0 },
+
+  { size: "11'' x14''", cost: 9.25 },
+  { size: "12'' x17''", cost: 10.75 },
+  { size: "12'' x12''", cost: 7.63 },
+  { size: "15in x 3.6in", cost: 3.41 },
+  { size: "10in x 11.9in", cost: 6.9 },
+];
 
 export default function ProductDetailModal() {
-  const [selectedSize, setSelectedSize] = useState("2x2");
+  const [selectedSize, setSelectedSize] = useState(sizes[0]);
   const [quantity, setQuantity] = useState(1);
   const [file, setFile] = useState<File>();
-
-  const sizes = [
-    "2x2",
-    "3x3",
-    "4x2",
-    "4x4",
-    "5x3",
-    "5x5",
-    "6x6",
-    "7x7",
-    "8x8",
-    "9x9",
-    "9x11",
-    "11x5",
-    "11x11",
-    "11x14",
-    "12x12",
-    "15in x 3.6in",
-    "10in x 11.9in",
-  ];
-
+  const router = useRouter();
   const handleFileChange = (e: any) => {
     setFile(e.target.files[0]);
+  };
+
+  const handleAddToCart = () => {
+    router.push("/cart");
   };
 
   return (
@@ -54,7 +61,10 @@ export default function ProductDetailModal() {
         {/* Right: Details */}
         <div className="flex-1 space-y-4">
           <h1 className="text-2xl font-semibold">DTF Transfers by Size</h1>
-          <p className="text-lg font-medium">$0.90 USD</p>
+          <p className="text-lg font-medium">
+            ${selectedSize.cost.toFixed(2)} USD
+          </p>
+
           <p className="text-sm text-gray-500">
             Shipping calculated at checkout.
           </p>
@@ -63,18 +73,22 @@ export default function ProductDetailModal() {
           <div>
             <h4 className="font-semibold mb-2">Size</h4>
             <div className="flex flex-wrap gap-2">
-              {sizes.map((size) => (
-                <button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  className={`px-3 py-1 border rounded text-sm cursor-pointer ${
-                    selectedSize === size
-                      ? "gold-theme-btn text-white"
-                      : "border-gray-300 text-gray-800"
-                  }`}
-                >
-                  {size.replace("x", " x ")}
-                </button>
+              {sizes.map((size, index) => (
+                <div key={index}>
+                  <button
+                    onClick={() => setSelectedSize(size)}
+                    className={`px-4 py-2 text-md border rounded cursor-pointer ${
+                      selectedSize === size
+                        ? "gold-theme-btn text-white"
+                        : "border-gray-300 text-gray-800"
+                    }`}
+                  >
+                    {size.size.replace("x", " x ")}
+                  </button>
+
+                  {/* Insert <br> after every 3 buttons */}
+                  {(index + 1) % 4 === 0 && <br key={`br-${index}`} />}
+                </div>
               ))}
             </div>
           </div>
@@ -123,11 +137,27 @@ export default function ProductDetailModal() {
             )}
             <p className="text-xs text-gray-400 mt-2">Files supported: .png</p>
           </div>
-
-          {/* Custom Size Button */}
-          <button className="text-sm underline mt-2 hover:text-black">
-            Upload Custom Size
-          </button>
+          {/* {file && file.name && (
+            <div className="flex flex-col items-center w-full">
+              <Image
+                src={URL.createObjectURL(file)}
+                alt="Uploaded Image"
+                width={800}
+                height={500}
+                className="mt-4"
+              />
+            </div>
+          )} */}
+          {file && file.name && (
+            <div className="flex flex-col items-center w-full">
+              <button
+                onClick={handleAddToCart}
+                className="text-sm mt-2 gold-theme-btn w-full p-3 text-white font-semibold rounded-md cursor-pointer"
+              >
+                Add to Cart
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

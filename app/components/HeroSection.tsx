@@ -30,8 +30,8 @@ export default function HeroSection() {
             <Image
               src="/backdrop.png"
               alt="Printing Designs"
-              width={1000}
-              height={1100}
+              width={800}
+              height={800}
               className="object-contain w-full"
               priority
             />
