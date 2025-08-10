@@ -1,25 +1,51 @@
 "use client";
 
-import { useState } from "react";
-import {
-  FaSearch,
-  FaUser,
-  FaShoppingBag,
-  FaBars,
-  FaTimes,
-  FaHome,
-} from "react-icons/fa";
+import { useState, useEffect, useRef } from "react";
+import { FaShoppingBag, FaBars, FaTimes, FaHome } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [cartOpen, setCartOpen] = useState(false);
+
+  const cartRef = useRef<HTMLDivElement>(null);
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
-  const toggleDropdown = (key: string) => {
-    setOpenDropdown(openDropdown === key ? null : key);
-  };
+  const toggleCart = () => setCartOpen(!cartOpen);
+
+  // Dummy cart data
+  const cartItems = [
+    { id: 1, name: "Product 1", price: 19.99, qty: 1 },
+    { id: 2, name: "Product 2", price: 29.99, qty: 2 },
+    { id: 3, name: "Product 3", price: 9.99, qty: 1 },
+  ];
+
+  // Calculate totals
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + item.price * item.qty,
+    0
+  );
+  const taxRate = 0.08; // 8% tax
+  const tax = subtotal * taxRate;
+  const total = subtotal + tax;
+
+  // Close cart if clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
+        setCartOpen(false);
+      }
+    };
+
+    if (cartOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [cartOpen]);
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-md">
@@ -41,93 +67,51 @@ export default function Navbar() {
 
       {/* Main Nav */}
       <nav className="flex items-center justify-between px-4 py-4 md:px-6 border-b">
-        {/* Logo */}
-
-        {/* Desktop Nav */}
-
-        {/* Right Icons */}
+        {/* Left Icon */}
         <div className="flex items-center gap-4 text-lg md:text-xl">
           <FaHome className="cursor-pointer text-2xl" />
         </div>
+
+        {/* Logo */}
         <div className="flex items-center gap-2">
           <Image src="/pp.jpg" alt="Logo" width={250} height={66} />
         </div>
+
+        {/* Right Icons */}
         <div className="flex items-center gap-4 text-lg md:text-xl">
-          <FaShoppingBag className="cursor-pointer text-2xl" />
+          <FaShoppingBag
+            className="cursor-pointer text-2xl"
+            onClick={toggleCart}
+          />
           <button className="md:hidden" onClick={toggleMenu}>
             {menuOpen ? <FaTimes /> : <FaBars />}
           </button>
         </div>
       </nav>
 
+      {/* Desktop Nav Links */}
       <ul className="hidden md:flex justify-center py-4 border-b gap-6 text-sm font-medium ">
-        <li className="relative group">
-          <button
-            onClick={() => toggleDropdown("dtf")}
-            className="hover:text-indigo-700"
-          >
-            DTF Transfers ▾
-          </button>
-          {openDropdown === "dtf" && (
-            <ul className="absolute top-full left-0 bg-white shadow-md rounded py-2 w-48 z-10">
-              <li>
-                <Link href="#" className="block px-4 py-2 hover:bg-gray-100">
-                  Gang Sheet Builder
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="block px-4 py-2 hover:bg-gray-100">
-                  DTF Roll Transfers
-                </Link>
-              </li>
-            </ul>
-          )}
-        </li>
-        <li className="relative group">
-          <button
-            onClick={() => toggleDropdown("uvdtf")}
-            className="hover:text-indigo-700"
-          >
-            UV DTF Stickers ▾
-          </button>
-          {openDropdown === "uvdtf" && (
-            <ul className="absolute top-full left-0 bg-white shadow-md rounded py-2 w-48 z-10">
-              <li>
-                <Link href="#" className="block px-4 py-2 hover:bg-gray-100">
-                  Glossy Finish
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="block px-4 py-2 hover:bg-gray-100">
-                  Matte Finish
-                </Link>
-              </li>
-            </ul>
-          )}
-        </li>
         <li>
-          <Link href="#" className="hover:text-indigo-700">
-            Custom Shirts
+          <Link href="/" className="gold-theme-color-hover">
+            Home
           </Link>
         </li>
         <li>
-          <Link href="#" className="hover:text-indigo-700">
-            Ready To Press DTF Designs
+          <Link href="/about" className="gold-theme-color-hover">
+            About
           </Link>
         </li>
         <li>
-          <Link href="#" className="hover:text-indigo-700">
-            Free Samples
-          </Link>
-        </li>
-        <li>
-          <Link href="#" className="hover:text-indigo-700">
-            Artwork Services
-          </Link>
-        </li>
-        <li>
-          <Link href="#" className="hover:text-indigo-700">
+          <Link href="/contact" className="gold-theme-color-hover">
             Contact
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/shop-now"
+            className="gold-theme-btn p-2 rounded-md text-white "
+          >
+            <button className="cursor-pointer">Shop Now</button>
           </Link>
         </li>
       </ul>
@@ -136,58 +120,76 @@ export default function Navbar() {
       {menuOpen && (
         <ul className="md:hidden px-4 p-4 pb-4 space-y-3 text-sm font-medium">
           <li>
-            <button
-              onClick={() => toggleDropdown("dtf")}
-              className="w-full text-left"
-            >
-              DTF Transfers ▾
-            </button>
-            {openDropdown === "dtf" && (
-              <ul className="pl-4 space-y-2">
-                <li>
-                  <Link href="#">Gang Sheet Builder</Link>
-                </li>
-                <li>
-                  <Link href="#">DTF Roll Transfers</Link>
-                </li>
-              </ul>
-            )}
+            <Link href="/" className="gold-theme-color-hover">
+              Home
+            </Link>
           </li>
           <li>
-            <button
-              onClick={() => toggleDropdown("uvdtf")}
-              className="w-full text-left"
-            >
-              UV DTF Stickers ▾
-            </button>
-            {openDropdown === "uvdtf" && (
-              <ul className="pl-4 space-y-2">
-                <li>
-                  <Link href="#">Glossy Finish</Link>
-                </li>
-                <li>
-                  <Link href="#">Matte Finish</Link>
-                </li>
-              </ul>
-            )}
+            <Link href="/about" className="gold-theme-color-hover">
+              About
+            </Link>
           </li>
           <li>
-            <Link href="#">Custom Shirts</Link>
-          </li>
-          <li>
-            <Link href="#">Ready To Press DTF Designs</Link>
-          </li>
-          <li>
-            <Link href="#">Free Samples</Link>
-          </li>
-          <li>
-            <Link href="#">Artwork Services</Link>
-          </li>
-          <li>
-            <Link href="#">Contact</Link>
+            <Link href="/contact" className="gold-theme-color-hover">
+              Contact
+            </Link>
           </li>
         </ul>
       )}
+
+      {/* Cart Sidebar - Slide Animation */}
+      <div
+        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg z-50 flex flex-col transform transition-transform duration-300 ease-in-out ${
+          cartOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+        ref={cartRef}
+      >
+        {/* Cart Header */}
+        <div className="flex justify-between items-center p-4 border-b">
+          <h2 className="text-lg font-semibold">Your Cart</h2>
+          <FaTimes
+            className="cursor-pointer text-xl"
+            onClick={() => setCartOpen(false)}
+          />
+        </div>
+
+        {/* Cart Items */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {cartItems.map((item) => (
+            <div
+              key={item.id}
+              className="flex justify-between items-center border-b pb-2"
+            >
+              <div>
+                <h3 className="font-medium">{item.name}</h3>
+                <p className="text-sm text-gray-500">Qty: {item.qty}</p>
+              </div>
+              <span className="font-semibold">
+                ${(item.price * item.qty).toFixed(2)}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Totals */}
+        <div className="p-4 border-t space-y-2">
+          <div className="flex justify-between text-sm">
+            <span>Subtotal</span>
+            <span>${subtotal.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>Tax (8%)</span>
+            <span>${tax.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between font-semibold text-base border-t pt-2">
+            <span>Total</span>
+            <span>${total.toFixed(2)}</span>
+          </div>
+          <button className="w-full mt-3 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">
+            Checkout
+          </button>
+        </div>
+      </div>
     </header>
   );
 }

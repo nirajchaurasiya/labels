@@ -11,7 +11,11 @@
 .gold-theme-color {
   color: lab(38 14.19 51.88);
 }
-
+.gold-theme-color-hover:hover,
+.gold-theme-bg-hover:hover,
+.gold-theme-btn-hover :hover {
+  color: lab(38 14.19 51.88);
+}
 .animate-marquee {
   display: inline-block;
   white-space: nowrap;
