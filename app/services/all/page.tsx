@@ -1,20 +1,17 @@
 import ProductCard from "@/app/components/ProductCard";
 import Sidebar from "@/app/components/SidebarProductCard";
-import SortDropdown from "@/app/components/SafeDropdown";
-import ProductDetailModal from "@/app/components/ProductDetailModal";
-import HeatPressInstructions from "@/app/components/HeatPressInstructions";
 
 const products = [
   {
     title: "DTF Transfers by Size",
     price: 0.9,
-    image: "/1.jpg",
+    image: "/backdrop.png",
     url: "/dtf-transfers-by-size",
   },
   {
     title: "Upload your DTF gang sheet",
     price: 15.12,
-    image: "/1.jpg",
+    image: "/dtf-gang-sheetsninja-transfers-636629_1.png",
     url: "/upload-your-dtf-gangsheet",
   },
 ];

@@ -1,48 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
-
-const initialCart = [
-  {
-    id: 1,
-    title: "Upload Your DTF Gang Sheet",
-    price: 15.12,
-    size: '16" x 24" (2 ft)',
-    fileName: "humanoidrobotandskulltpszyg6t6x2cojs3.jpg",
-    image: "/1.jpg", // Update with your actual path
-    quantity: 1,
-  },
-  {
-    id: 2,
-    title: "DTF Transfers by Size",
-    price: 6.9,
-    size: "10in x 11.9in",
-    fileName: "humanoidrobotandskulltpszyg6t6x2cojs3.jpg",
-    image: "/1.jpg", // Update with your actual path
-    quantity: 1,
-  },
-];
+import { useCart } from "../context/useCartProvider";
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState(initialCart);
-
-  const updateQuantity = (id: number, delta: number) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
-    );
-  };
-
-  const removeItem = (id: number) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-  };
+  const { cartItems, removeItem, updateQty } = useCart();
 
   const total = cartItems
-    .reduce((acc, item) => acc + item.price * item.quantity, 0)
+    .reduce((acc, item) => acc + item.price * item.qty, 0)
     .toFixed(2);
 
   return (
@@ -65,32 +30,37 @@ export default function CartPage() {
               width={96}
               height={96}
               src={item.image}
-              alt={item.title}
+              alt={item.title || item.name}
               className="object-fill rounded"
             />
             <div>
               <h2 className="font-semibold text-base sm:text-lg">
-                {item.title}
+                {item.title || item.name}
               </h2>
 
               <p className="text-sm">${item.price.toFixed(2)}</p>
-              <p className="text-sm text-gray-500">Size: {item.size}</p>
-              <p className="text-sm text-blue-600 underline">
-                Uploaded File: {item.fileName}
-              </p>
+              {/* Optional: add size and fileName if available */}
+              {item.size && (
+                <p className="text-sm text-gray-500">Size: {item.size}</p>
+              )}
+              {item.name && (
+                <p className="text-sm text-blue-600 underline">
+                  Uploaded File: {item.name}
+                </p>
+              )}
             </div>
           </div>
 
           <div className="flex items-center justify-end md:justify-center gap-2">
             <button
-              onClick={() => updateQuantity(item.id, -1)}
+              onClick={() => updateQty(item.id, item.qty - 1)}
               className="border px-2 py-1"
             >
               −
             </button>
-            <span>{item.quantity}</span>
+            <span>{item.qty}</span>
             <button
-              onClick={() => updateQuantity(item.id, 1)}
+              onClick={() => updateQty(item.id, item.qty + 1)}
               className="border px-2 py-1"
             >
               +
@@ -104,7 +74,7 @@ export default function CartPage() {
           </div>
 
           <div className="text-right font-medium">
-            ${(item.price * item.quantity).toFixed(2)}
+            ${(item.price * item.qty).toFixed(2)}
           </div>
         </div>
       ))}
@@ -142,7 +112,7 @@ export default function CartPage() {
             />
             <img
               src="/applepay.png"
-              alt="Google Pay"
+              alt="Apple Pay"
               className="border cursor-pointer h-10"
             />
           </div>

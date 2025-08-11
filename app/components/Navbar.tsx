@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import { FaShoppingBag, FaBars, FaTimes, FaHome } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
+import { useCart } from "../context/useCartProvider";
+import { BiTrash } from "react-icons/bi";
+import { BsTrash } from "react-icons/bs";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -14,12 +17,8 @@ export default function Navbar() {
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleCart = () => setCartOpen(!cartOpen);
 
-  // Dummy cart data
-  const cartItems = [
-    { id: 1, name: "Product 1", price: 19.99, qty: 1 },
-    { id: 2, name: "Product 2", price: 29.99, qty: 2 },
-    { id: 3, name: "Product 3", price: 9.99, qty: 1 },
-  ];
+  // Get cart context with needed methods
+  const { cartItems, addItem, removeItem, updateQty } = useCart();
 
   // Calculate totals
   const subtotal = cartItems.reduce(
@@ -46,6 +45,25 @@ export default function Navbar() {
 
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [cartOpen]);
+
+  // Handlers to change qty
+  const incrementQty = (itemId: number) => {
+    const item = cartItems.find((i) => i.id === itemId);
+    if (item) {
+      updateQty(itemId, item.qty + 1);
+    }
+  };
+
+  const decrementQty = (itemId: number) => {
+    const item = cartItems.find((i) => i.id === itemId);
+    if (item) {
+      if (item.qty > 1) {
+        updateQty(itemId, item.qty - 1);
+      } else {
+        removeItem(itemId);
+      }
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-md">
@@ -78,11 +96,16 @@ export default function Navbar() {
         </div>
 
         {/* Right Icons */}
-        <div className="flex items-center gap-4 text-lg md:text-xl">
+        <div className="flex items-center gap-4 text-lg md:text-xl relative">
           <FaShoppingBag
             className="cursor-pointer text-2xl"
             onClick={toggleCart}
           />
+          {cartItems.length > 0 && (
+            <span className="absolute gold-theme-bg -top-1 -right-1 text-white rounded-full w-5 h-5 flex text-sm font-semibold items-center justify-center">
+              {cartItems.length}
+            </span>
+          )}
           <button className="md:hidden" onClick={toggleMenu}>
             {menuOpen ? <FaTimes /> : <FaBars />}
           </button>
@@ -154,39 +177,81 @@ export default function Navbar() {
         </div>
 
         {/* Cart Items */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
           {cartItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex justify-between items-center border-b pb-2"
-            >
-              <div>
-                <h3 className="font-medium">{item.name}</h3>
-                <p className="text-sm text-gray-500">Qty: {item.qty}</p>
+            <div key={item.id} className="flex border-b pb-4 gap-4">
+              {/* Product Image */}
+              <div className="flex-shrink-0 w-20 h-20 bg-gray-100 rounded overflow-hidden">
+                {/* Use actual product image URL */}
+                <Image
+                  src={item.image || "/1.jpg"}
+                  alt={item.name}
+                  width={80}
+                  height={80}
+                  className="object-cover"
+                />
               </div>
-              <span className="font-semibold">
+
+              {/* Details */}
+              <div className="flex flex-col flex-grow">
+                <h3 className="font-semibold text-sm">{item.title}</h3>
+                <p className="text-xs text-gray-600">
+                  ${item.price.toFixed(2)}
+                </p>
+                <p className="text-xs text-gray-600">
+                  Size: {item.size || "N/A"}
+                </p>
+                <p className="text-xs text-gray-600">
+                  Uploaded File: {item.name || "N/A"}
+                </p>
+                {/* Qty Selector */}
+                <div className="flex items-center mt-auto space-x-2 py-3">
+                  <button
+                    onClick={() => decrementQty(item.id)}
+                    className="px-2 py-1 border rounded text-sm select-none"
+                  >
+                    −
+                  </button>
+                  <span>{item.qty}</span>
+                  <button
+                    onClick={() => incrementQty(item.id)}
+                    className="px-2 py-1 border rounded text-sm select-none"
+                  >
+                    +
+                  </button>
+                  <button
+                    onClick={() => removeItem(item.id)}
+                    className="ml-4 text-red-500 hover:text-red-700"
+                    aria-label={`Remove ${item.name}`}
+                  >
+                    <BsTrash size={23} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Total Price per Item */}
+              <div className="flex-shrink-0 font-semibold text-sm whitespace-nowrap">
                 ${(item.price * item.qty).toFixed(2)}
-              </span>
+              </div>
             </div>
           ))}
         </div>
 
-        {/* Totals */}
-        <div className="p-4 border-t space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
+        {/* Totals Section */}
+        <div className="p-4 border-t space-y-3">
+          <div className="flex justify-between text-sm font-semibold">
+            <span>Estimated Total</span>
+            <span>${subtotal.toFixed(2)} USD</span>
           </div>
-          <div className="flex justify-between text-sm">
-            <span>Tax (8%)</span>
-            <span>${tax.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between font-semibold text-base border-t pt-2">
-            <span>Total</span>
-            <span>${total.toFixed(2)}</span>
-          </div>
-          <button className="w-full mt-3 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">
-            Checkout
+          <p className="text-xs text-gray-500">
+            Taxes, discounts and{" "}
+            <Link href="/shipping" className="underline">
+              shipping
+            </Link>{" "}
+            calculated at checkout.
+          </p>
+          <button className="w-full bg-black text-white py-3 rounded hover:bg-gray-900">
+            Check out
           </button>
         </div>
       </div>
