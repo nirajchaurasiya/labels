@@ -43,6 +43,7 @@ export default function DTFBYSize() {
         name: file.name,
         size: selectedSize.size,
         image: URL.createObjectURL(file),
+        quantity,
       });
       router.push("/cart");
     }

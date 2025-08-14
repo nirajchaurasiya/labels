@@ -2,13 +2,24 @@
 
 import Image from "next/image";
 import { useCart } from "../context/useCartProvider";
+import { BsTrash } from "react-icons/bs";
+import { useRouter } from "next/navigation";
 
 export default function CartPage() {
   const { cartItems, removeItem, updateQty } = useCart();
 
-  const total = cartItems
-    .reduce((acc, item) => acc + item.price * item.qty, 0)
-    .toFixed(2);
+  // Calculate totals
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+  const taxRate = 0.08; // 8% tax
+  const tax = subtotal * taxRate;
+  const total = subtotal + tax;
+  const router = useRouter();
+  const handleCheckout = () => {
+    router.push(`/checkout`);
+  };
 
   return (
     <div className="max-w-6xl mx-auto p-6 min-h-screen">
@@ -31,7 +42,7 @@ export default function CartPage() {
               height={96}
               src={item.image}
               alt={item.title || item.name}
-              className="object-fill rounded"
+              className="object-cover rounded"
             />
             <div>
               <h2 className="font-semibold text-base sm:text-lg">
@@ -53,68 +64,81 @@ export default function CartPage() {
 
           <div className="flex items-center justify-end md:justify-center gap-2">
             <button
-              onClick={() => updateQty(item.id, item.qty - 1)}
-              className="border px-2 py-1"
+              onClick={() => updateQty(item.id, item.quantity - 1)}
+              className="cursor-pointer border px-2 py-1"
             >
               −
             </button>
-            <span>{item.qty}</span>
+            <span>{item.quantity}</span>
             <button
-              onClick={() => updateQty(item.id, item.qty + 1)}
-              className="border px-2 py-1"
+              onClick={() => updateQty(item.id, item.quantity + 1)}
+              className="cursor-pointer border px-2 py-1"
             >
               +
             </button>
             <button
               onClick={() => removeItem(item.id)}
-              className="ml-2 text-gray-500 hover:text-red-600"
+              className="cursor-pointer ml-2 text-red-700 hover:text-red-600"
             >
-              🗑
+              <BsTrash size={20} />
             </button>
           </div>
 
           <div className="text-right font-medium">
-            ${(item.price * item.qty).toFixed(2)}
+            ${(item.price * item.quantity).toFixed(2)}
           </div>
         </div>
       ))}
 
       {/* Total section */}
-      <div className="flex justify-end mt-6 gap-5">
-        <div className="text-lg font-semibold">Estimated Total</div>
-        <div className="text-xl font-bold">${total} USD</div>
-      </div>
+      <div className="mt-6 flex flex-col gap-2">
+        <div className="text-gray-600 text-sm">
+          <div className="flex justify-end gap-5">
+            <span>Tax (8%) </span>
+            <span>${tax.toFixed(2)}</span>
+          </div>
 
-      <p className="text-sm text-gray-600 mt-2 flex justify-end">
-        Taxes, discounts and{" "}
-        <span className="underline text-blue-600 cursor-pointer">shipping</span>{" "}
-        calculated at checkout.
-      </p>
+          <div className="flex justify-end gap-5">
+            <div className="">Subtotal</div>
+            <div className="">${subtotal.toFixed(2)} USD</div>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-5">
+          <div className="text-lg font-semibold">Estimated Total</div>
+          <div className="text-xl font-bold">${total.toFixed(2)} USD</div>
+        </div>
+      </div>
 
       {/* Checkout buttons */}
       <div className="flex justify-end">
         <div className="mt-6 ap-4 flex flex-col gap-4 max-w-sm">
           <div className="flex justify-end w-full">
-            <button className="bg-black text-white px-6 w-full py-3 cursor-pointer">
+            <button
+              onClick={handleCheckout}
+              className="bg-black text-white px-6 w-full py-3 cursor-pointer"
+            >
               Check out
             </button>
           </div>
-          <div className="flex gap-2 justify-end w-full">
-            <img
-              src="/shoppay.png"
-              alt="Shop Pay"
-              className="border cursor-pointer h-10"
+          <div className="flex gap-2 justify-end w-full text-sm text-gray-500">
+            {/* <img
+              src="/stripe.png"
+              alt="Stripe"
+              className="border cursor-pointer h-12 select-none"
             />
             <img
-              src="/paypal.png"
-              alt="PayPal"
-              className="border cursor-pointer h-10"
+              src="/cashapp.png"
+              alt="Cash App"
+              className="border cursor-pointer h-12 select-none"
             />
             <img
-              src="/applepay.png"
-              alt="Apple Pay"
-              className="border cursor-pointer h-10"
-            />
+              src="/zelle.png"
+              alt="Zelle"
+              className="border cursor-pointer h-12 select-none"
+            /> */}
+            You will get options to pay via card, cashapp, zelle on the next
+            page when you hit checkout.
           </div>
         </div>
       </div>

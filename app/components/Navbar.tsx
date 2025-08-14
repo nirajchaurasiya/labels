@@ -5,8 +5,8 @@ import { FaShoppingBag, FaBars, FaTimes, FaHome } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "../context/useCartProvider";
-import { BiTrash } from "react-icons/bi";
 import { BsTrash } from "react-icons/bs";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -18,17 +18,17 @@ export default function Navbar() {
   const toggleCart = () => setCartOpen(!cartOpen);
 
   // Get cart context with needed methods
-  const { cartItems, addItem, removeItem, updateQty } = useCart();
+  const { cartItems, removeItem, updateQty } = useCart();
 
   // Calculate totals
   const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.qty,
+    (sum, item) => sum + item.price * item.quantity,
     0
   );
   const taxRate = 0.08; // 8% tax
   const tax = subtotal * taxRate;
   const total = subtotal + tax;
-
+  const router = useRouter();
   // Close cart if clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -46,23 +46,8 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [cartOpen]);
 
-  // Handlers to change qty
-  const incrementQty = (itemId: number) => {
-    const item = cartItems.find((i) => i.id === itemId);
-    if (item) {
-      updateQty(itemId, item.qty + 1);
-    }
-  };
-
-  const decrementQty = (itemId: number) => {
-    const item = cartItems.find((i) => i.id === itemId);
-    if (item) {
-      if (item.qty > 1) {
-        updateQty(itemId, item.qty - 1);
-      } else {
-        removeItem(itemId);
-      }
-    }
+  const handleCheckout = () => {
+    router.push(`/checkout`);
   };
 
   return (
@@ -124,9 +109,15 @@ export default function Navbar() {
             About
           </Link>
         </li>
+
         <li>
           <Link href="/contact" className="gold-theme-color-hover">
             Contact
+          </Link>
+        </li>
+        <li>
+          <Link href="/cart" className="gold-theme-color-hover">
+            Cart
           </Link>
         </li>
         <li>
@@ -152,9 +143,23 @@ export default function Navbar() {
               About
             </Link>
           </li>
+
           <li>
             <Link href="/contact" className="gold-theme-color-hover">
               Contact
+            </Link>
+          </li>
+          <li>
+            <Link href="/cart" className="gold-theme-color-hover">
+              Cart
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/services/all"
+              className="gold-theme-btn p-2 rounded-md text-white "
+            >
+              <button className="cursor-pointer">Shop Now</button>
             </Link>
           </li>
         </ul>
@@ -207,14 +212,14 @@ export default function Navbar() {
                 {/* Qty Selector */}
                 <div className="flex items-center mt-auto space-x-2 py-3">
                   <button
-                    onClick={() => decrementQty(item.id)}
+                    onClick={() => updateQty(item.id, item.quantity - 1)}
                     className="px-2 py-1 border rounded text-sm select-none"
                   >
                     −
                   </button>
-                  <span>{item.qty}</span>
+                  <span>{item.quantity}</span>
                   <button
-                    onClick={() => incrementQty(item.id)}
+                    onClick={() => updateQty(item.id, item.quantity + 1)}
                     className="px-2 py-1 border rounded text-sm select-none"
                   >
                     +
@@ -231,26 +236,37 @@ export default function Navbar() {
 
               {/* Total Price per Item */}
               <div className="flex-shrink-0 font-semibold text-sm whitespace-nowrap">
-                ${(item.price * item.qty).toFixed(2)}
+                ${(item.price * item.quantity).toFixed(2)}
               </div>
             </div>
           ))}
         </div>
 
         {/* Totals Section */}
-        <div className="p-4 border-t space-y-3">
-          <div className="flex justify-between text-sm font-semibold">
-            <span>Estimated Total</span>
-            <span>${subtotal.toFixed(2)} USD</span>
+        <div className="p-4 border-t space-y-3 text-sm">
+          <div className="flex justify-between font-semibold">
+            <span>Subtotal</span>
+            <span>${subtotal.toFixed(2)}</span>
           </div>
-          <p className="text-xs text-gray-500">
-            Taxes, discounts and{" "}
+          <div className="flex justify-between">
+            <span>Tax (8%)</span>
+            <span>${tax.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between font-semibold text-base border-t pt-2">
+            <span>Estimated Total</span>
+            <span>${total.toFixed(2)} USD</span>
+          </div>
+          {/* <p className="text-xs text-gray-500">
+            Discounts and{" "}
             <Link href="/shipping" className="underline">
               shipping
             </Link>{" "}
             calculated at checkout.
-          </p>
-          <button className="w-full bg-black text-white py-3 rounded hover:bg-gray-900">
+          </p> */}
+          <button
+            onClick={handleCheckout}
+            className="w-full bg-black text-white py-3 rounded hover:bg-gray-900"
+          >
             Check out
           </button>
         </div>

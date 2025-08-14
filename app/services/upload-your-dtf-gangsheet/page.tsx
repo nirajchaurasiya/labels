@@ -32,11 +32,12 @@ export default function DTFBYGangSheet() {
     if (file) {
       addItem({
         id: Date.now(),
-        title: "DTF Transfers by Size",
+        title: "Upload Your DTF Gang Sheet",
         price: selectedSize.cost,
         name: file.name,
         size: selectedSize.size,
         image: URL.createObjectURL(file),
+        quantity,
       });
       router.push("/cart");
     }
@@ -62,7 +63,7 @@ export default function DTFBYGangSheet() {
 
         {/* Right: Details */}
         <div className="flex-1 space-y-4">
-          <h1 className="text-2xl font-semibold">DTF Transfers by Size</h1>
+          <h1 className="text-2xl font-semibold">Upload Your DTF Gang Sheet</h1>
           <p className="text-lg font-medium">
             ${selectedSize.cost.toFixed(2)} USD
           </p>
