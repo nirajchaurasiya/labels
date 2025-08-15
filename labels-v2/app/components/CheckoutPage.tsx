@@ -52,16 +52,16 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
       elements,
       clientSecret,
       confirmParams: {
-        return_url: `http://localhost:3000/payment-success?payment_intent=${paymentIntentId}&amount=${amount}`,
+        return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment-success?payment_intent=${paymentIntentId}&amount=${amount}`,
       },
     });
 
     if (error) {
       setErrorMessage(error.message);
       // Redirect to failure URL on error
-      window.location.href = `http://localhost:3000/payment-failure?error=${encodeURIComponent(
-        error?.message!
-      )}`;
+      window.location.href = `${
+        process.env.NEXT_PUBLIC_BASE_URL
+      }/payment-failure?error=${encodeURIComponent(error?.message!)}`;
     }
 
     setLoading(false);
