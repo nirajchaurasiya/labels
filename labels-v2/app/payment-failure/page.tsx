@@ -1,7 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
 // app/payment-failure/page.tsx
-
+import React from "react";
 import { useSearchParams } from "next/navigation";
 
 export default function PaymentFailure() {

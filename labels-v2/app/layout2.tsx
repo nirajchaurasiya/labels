@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { Suspense } from "react";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -8,7 +8,7 @@ export default function Layout2({ children }: { children: React.ReactNode }) {
   return (
     <CartProvider>
       <Navbar />
-      {children}
+      <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
       <Footer />
     </CartProvider>
   );
