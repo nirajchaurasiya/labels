@@ -11,41 +11,37 @@ export default function PaymentSuccess() {
 
   useEffect(() => {
     localStorage.removeItem("cart");
+    if (!paymentIntent) return;
 
     let retries = 0;
     const checkStatus = () => {
-      if (paymentIntent) {
-        fetch(`/api/check-payment?id=${paymentIntent}`)
-          .then((res) => {
-            if (!res.ok) throw new Error("Network response not ok");
-            return res.json();
-          })
-          .then((data) => {
-            console.log("Payment status from backend:", data.status);
-            const successStatuses = [
-              "succeeded",
-              "processing",
-              "requires_capture",
-            ];
-            if (successStatuses.includes(data.status)) {
-              setVerified(true);
-            } else if (data.status === "processing" && retries < 5) {
-              retries++;
-              setTimeout(checkStatus, 2000);
-            } else {
-              setVerified(false);
-            }
-          })
-          .catch((error) => {
-            console.error("Fetch error:", error);
+      fetch(`/api/check-payment?id=${paymentIntent}`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Network response not ok");
+          return res.json();
+        })
+        .then((data) => {
+          const successStatuses = [
+            "succeeded",
+            "processing",
+            "requires_capture",
+          ];
+          if (successStatuses.includes(data.status)) {
+            setVerified(true);
+          } else if (data.status === "processing" && retries < 5) {
+            retries++;
+            setTimeout(checkStatus, 2000);
+          } else {
             setVerified(false);
-          });
-      }
+          }
+        })
+        .catch(() => setVerified(false));
     };
 
     checkStatus();
   }, [paymentIntent]);
 
+  // Loading state
   if (verified === null) {
     return (
       <div className="min-h-screen flex items-center justify-center text-lg">
@@ -54,6 +50,7 @@ export default function PaymentSuccess() {
     );
   }
 
+  // Payment failed
   if (!verified) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
@@ -71,8 +68,7 @@ export default function PaymentSuccess() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 
-                9 0 0118 0z"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
             </div>
@@ -112,6 +108,7 @@ export default function PaymentSuccess() {
     );
   }
 
+  // Payment successful
   return (
     <div className="min-h-screen bg-gray-50 px-4 md:px-12 py-8">
       <main className="max-w-3xl mx-auto p-10 text-center border border-gray-300 rounded-md bg-white shadow-md mt-12">

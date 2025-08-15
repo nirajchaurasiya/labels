@@ -1,41 +1,33 @@
-import { buffer } from "micro";
+// app/api/webhook/route.ts
 import Stripe from "stripe";
-import type { NextApiRequest, NextApiResponse } from "next";
-
-export const config = {
-  api: {
-    bodyParser: false, // Stripe needs raw body
-  },
-};
+import { NextRequest, NextResponse } from "next/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-04-10" as Stripe.LatestApiVersion,
 });
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
+export async function POST(req: NextRequest) {
+  const sig = req.headers.get("stripe-signature");
 
-  const sig = req.headers["stripe-signature"];
-  if (!sig) return res.status(400).send("Missing Stripe signature");
+  if (!sig) {
+    return new NextResponse("Missing Stripe signature", { status: 400 });
+  }
 
   let event;
+  const rawBody = await req.text(); // get raw body from NextRequest
 
   try {
-    const buf = await buffer(req);
     event = stripe.webhooks.constructEvent(
-      buf,
+      rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err: any) {
-    console.error("Webhook signature verification failed", err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    console.error("Webhook signature verification failed:", err.message);
+    return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
   }
 
-  // Handle events
+  // Handle the event
   switch (event.type) {
     case "payment_intent.succeeded":
       console.log("✅ Payment succeeded:", event.data.object.id);
@@ -49,5 +41,5 @@ export default async function handler(
       console.log(`Unhandled event type: ${event.type}`);
   }
 
-  res.json({ received: true });
+  return NextResponse.json({ received: true });
 }
