@@ -63,8 +63,8 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
         error?.message!
       )}`;
     }
-
     setLoading(false);
+    window.close();
   };
 
   if (!clientSecret || !stripe || !elements) {

@@ -63,7 +63,7 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
         process.env.NEXT_PUBLIC_BASE_URL
       }/payment-failure?error=${encodeURIComponent(error?.message!)}`;
     }
-
+    window.close();
     setLoading(false);
   };
 
