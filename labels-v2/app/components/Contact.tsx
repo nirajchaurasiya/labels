@@ -69,7 +69,13 @@ export default function Contact() {
                 </button>
               </div>
               <div className="p-2 w-full pt-8 mt-8 border-t border-gray-200 text-center">
-                <a className="gold-theme-color">chardaywoods@gmail.com</a>
+                <a
+                  href="mailto:labelsdtf@yahoo.com"
+                  target="_blank"
+                  className="gold-theme-color"
+                >
+                  labelsdtf@yahoo.com
+                </a>
                 <p className="leading-normal my-5">2621 E Nettleton</p>
                 <span className="inline-flex">
                   <a className="text-gray-500">
