@@ -2,6 +2,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "@/app/context/useCartProvider";
+import { v4 as uuidv4 } from "uuid";
+
 const sizes = [
   { size: "2'' x2''", cost: 1.35 },
   { size: "3'' x3''", cost: 1.35 },
@@ -16,7 +18,6 @@ const sizes = [
   { size: "9'' x11''", cost: 5.5 },
   { size: "11'' x5''", cost: 4.25 },
   { size: "11'' x11''", cost: 7.0 },
-
   { size: "11'' x14''", cost: 9.25 },
   { size: "12'' x17''", cost: 10.75 },
   { size: "12'' x12''", cost: 7.63 },
@@ -28,21 +29,55 @@ export default function DTFBYSize() {
   const [selectedSize, setSelectedSize] = useState(sizes[0]);
   const [quantity, setQuantity] = useState(1);
   const [file, setFile] = useState<File>();
+  const [uploadedUrl, setUploadedUrl] = useState<string>("");
+  const [uploadStatus, setUploadStatus] = useState<string>("");
+  const [uniqueName, setUniqueName] = useState("");
   const router = useRouter();
   const { addItem } = useCart();
-  const handleFileChange = (e: any) => {
-    setFile(e.target.files[0]);
+
+  const handleFileChange = async (e: any) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    setUploadStatus("Uploading...");
+
+    // Generate unique name
+    const uniqueName = `${Date.now()}_${uuidv4()}_${selectedFile.name}`;
+    setUniqueName(uniqueName);
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("public_id", uniqueName); // Cloudinary will use this name
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.url) {
+        setFile(selectedFile);
+        setUploadedUrl(data.url);
+        setUploadStatus("Upload successful ✅");
+      } else {
+        setUploadStatus("Upload failed ❌");
+      }
+    } catch (err) {
+      console.error(err);
+      setUploadStatus("Upload failed ❌");
+    }
   };
 
   const handleAddToCart = () => {
-    if (file) {
+    if (uploadedUrl && file) {
+      console.log("Adding to cart", uploadedUrl, file);
       addItem({
         id: Date.now(),
         title: "DTF Transfers by Size",
         price: selectedSize.cost,
-        name: file.name,
+        name: uniqueName,
         size: selectedSize.size,
-        image: URL.createObjectURL(file),
+        image: uploadedUrl,
         quantity,
       });
       router.push("/cart");
@@ -94,8 +129,6 @@ export default function DTFBYSize() {
                   >
                     {size.size.replace("x", " x ")}
                   </button>
-
-                  {/* Insert <br> after every 3 buttons */}
                   {(index + 1) % 4 === 0 && <br key={`br-${index}`} />}
                 </div>
               ))}
@@ -139,25 +172,28 @@ export default function DTFBYSize() {
             >
               Browse
             </label>
+
             {file && (
-              <p className="mt-2 text-sm text-green-600">
-                Selected: {file.name}
+              <p className="mt-2 text-sm text-gray-800">
+                Selected: {uniqueName}
+              </p>
+            )}
+            {uploadStatus && (
+              <p
+                className={`mt-1 text-sm ${
+                  uploadStatus.includes("successful")
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                {uploadStatus}
               </p>
             )}
             <p className="text-xs text-gray-400 mt-2">Files supported: .png</p>
           </div>
-          {/* {file && file.name && (
-            <div className="flex flex-col items-center w-full">
-              <Image
-                src={URL.createObjectURL(file)}
-                alt="Uploaded Image"
-                width={800}
-                height={500}
-                className="mt-4"
-              />
-            </div>
-          )} */}
-          {file && file.name && (
+
+          {/* Add to Cart */}
+          {uploadedUrl && (
             <div className="flex flex-col items-center w-full">
               <button
                 onClick={handleAddToCart}
@@ -170,6 +206,7 @@ export default function DTFBYSize() {
         </div>
       </div>
 
+      {/* Description */}
       <div className="description py-12 flex flex-col gap-5">
         <p className="text-2xl font-semibold">Description</p>
         <p>

@@ -4,9 +4,15 @@ import Image from "next/image";
 import { useCart } from "../context/useCartProvider";
 import { BsTrash } from "react-icons/bs";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function CartPage() {
   const { cartItems, removeItem, updateQty } = useCart();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Calculate totals
   const subtotal = cartItems.reduce(
@@ -21,7 +27,14 @@ export default function CartPage() {
     router.push(`/checkout`);
   };
 
-  return (
+  return !isClient ? (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex flex-col items-center">
+        <div className="w-16 h-16 border-4 border-t-4 border-black border-t-white rounded-full animate-spin"></div>
+        <p className="mt-4 text-gray-700 text-lg font-medium">Loading...</p>
+      </div>
+    </div>
+  ) : (
     <div className="max-w-6xl mx-auto p-6 min-h-screen">
       <h1 className="text-3xl font-bold mb-6">Your cart</h1>
 

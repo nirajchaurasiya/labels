@@ -2,7 +2,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "@/app/context/useCartProvider";
+import { v4 as uuidv4 } from "uuid";
 import Accordion from "./ProductInfo";
+
 const sizes = [
   { size: '16" x 24" (2 ft)', cost: 15.12 },
   { size: '16" x 36" (3 ft)', cost: 22.68 },
@@ -22,21 +24,54 @@ export default function DTFBYGangSheet() {
   const [selectedSize, setSelectedSize] = useState(sizes[0]);
   const [quantity, setQuantity] = useState(1);
   const [file, setFile] = useState<File>();
+  const [uploadedUrl, setUploadedUrl] = useState<string>("");
+  const [uploadStatus, setUploadStatus] = useState<string>("");
+  const [uniqueName, setUniqueName] = useState<string>("");
   const router = useRouter();
   const { addItem } = useCart();
-  const handleFileChange = (e: any) => {
-    setFile(e.target.files[0]);
+
+  const handleFileChange = async (e: any) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    setUploadStatus("Uploading...");
+
+    const uniqueName = `${Date.now()}_${uuidv4()}_${selectedFile.name}`;
+    setUniqueName(uniqueName);
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("public_id", uniqueName);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.url) {
+        setFile(selectedFile);
+        setUploadedUrl(data.url);
+        setUploadStatus("Upload successful ✅");
+      } else {
+        setUploadStatus("Upload failed ❌");
+      }
+    } catch (err) {
+      console.error(err);
+      setUploadStatus("Upload failed ❌");
+    }
   };
 
   const handleAddToCart = () => {
-    if (file) {
+    if (uploadedUrl && file) {
       addItem({
         id: Date.now(),
         title: "Upload Your DTF Gang Sheet",
         price: selectedSize.cost,
-        name: file.name,
+        name: uniqueName,
         size: selectedSize.size,
-        image: URL.createObjectURL(file),
+        image: uploadedUrl,
         quantity,
       });
       router.push("/cart");
@@ -47,7 +82,7 @@ export default function DTFBYGangSheet() {
     <div className="bg-white md:w-7xl w-full rounded-md p-6 container flex items-center flex-col justify-center mx-auto my-8">
       <div className="flex flex-col md:flex-row gap-10">
         {/* Left: Image */}
-        <div className="flex-1">
+        <div className="flex-1 bg-gray-100 p-4">
           <img
             src="/dtf-gang-sheetsninja-transfers-636629_1.png"
             alt="Product Preview"
@@ -88,8 +123,6 @@ export default function DTFBYGangSheet() {
                   >
                     {size.size.replace("x", " x ")}
                   </button>
-
-                  {/* Insert <br> after every 3 buttons */}
                   {(index + 1) % 4 === 0 && <br key={`br-${index}`} />}
                 </div>
               ))}
@@ -133,25 +166,28 @@ export default function DTFBYGangSheet() {
             >
               Browse
             </label>
+
             {file && (
-              <p className="mt-2 text-sm text-green-600">
-                Selected: {file.name}
+              <p className="mt-2 text-sm text-gray-800">
+                Selected: {uniqueName}
+              </p>
+            )}
+            {uploadStatus && (
+              <p
+                className={`mt-1 text-sm ${
+                  uploadStatus.includes("successful")
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                {uploadStatus}
               </p>
             )}
             <p className="text-xs text-gray-400 mt-2">Files supported: .png</p>
           </div>
-          {/* {file && file.name && (
-            <div className="flex flex-col items-center w-full">
-              <Image
-                src={URL.createObjectURL(file)}
-                alt="Uploaded Image"
-                width={800}
-                height={500}
-                className="mt-4"
-              />
-            </div>
-          )} */}
-          {file && file.name && (
+
+          {/* Add to Cart */}
+          {uploadedUrl && (
             <div className="flex flex-col items-center w-full">
               <button
                 onClick={handleAddToCart}
@@ -161,8 +197,9 @@ export default function DTFBYGangSheet() {
               </button>
             </div>
           )}
+
           <div className="py-4 text-xs flex flex-col gap-1">
-            <p className="">Pickup available at 4611 East 11th Street</p>
+            <p>Pickup available at 4611 East 11th Street</p>
             <p>Usually ready in 24 hours</p>
             <p className="underline italic cursor-pointer">
               View store information
@@ -173,6 +210,7 @@ export default function DTFBYGangSheet() {
         </div>
       </div>
 
+      {/* Description */}
       <div className="description py-12 flex flex-col gap-5">
         <p className="text-2xl font-semibold">Description</p>
         <p>
@@ -188,8 +226,8 @@ export default function DTFBYGangSheet() {
           </span>
           : Break free from the limitations of one-size-fits-all transfers. Our
           transfer sheets come in various sizes, allowing you to maximize each
-          design&apos;s impact—whether it&apos;s a small emblem or a bold,
-          full-scale graphic—perfectly fitted to its intended garment.
+          design's impact—whether it's a small emblem or a bold, full-scale
+          graphic—perfectly fitted to its intended garment.
         </p>
 
         <p>
