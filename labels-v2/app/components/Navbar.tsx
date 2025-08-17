@@ -72,7 +72,10 @@ export default function Navbar() {
       <nav className="flex items-center justify-between px-4 py-4 md:px-6 border-b">
         {/* Left Icon */}
         <div className="flex items-center gap-4 text-lg md:text-xl">
-          <FaHome className="cursor-pointer text-2xl" />
+          <FaHome
+            onClick={() => router.push("/")}
+            className="cursor-pointer text-2xl"
+          />
         </div>
 
         {/* Logo */}
