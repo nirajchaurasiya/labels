@@ -268,7 +268,8 @@ export default function Navbar() {
           </p> */}
           <button
             onClick={handleCheckout}
-            className="w-full bg-black text-white py-3 rounded hover:bg-gray-900"
+            disabled={cartItems.length === 0}
+            className="gold-theme-bg text-white px-6 w-full py-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Check out
           </button>

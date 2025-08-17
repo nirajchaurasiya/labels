@@ -10,7 +10,6 @@ import { useCart } from "../context/useCartProvider";
 
 export default function PaymentSuccess() {
   const searchParams = useSearchParams();
-  const paymentAmount = parseFloat(searchParams.get("amount") || "0");
   const paymentIntent = searchParams.get("payment_intent");
   const [verified, setVerified] = useState<boolean | null>(null);
   const { cartItems } = useCart();

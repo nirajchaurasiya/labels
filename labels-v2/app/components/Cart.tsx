@@ -129,7 +129,8 @@ export default function CartPage() {
           <div className="flex justify-end w-full">
             <button
               onClick={handleCheckout}
-              className="bg-black text-white px-6 w-full py-3 cursor-pointer"
+              disabled={cartItems.length === 0}
+              className="gold-theme-bg text-white px-6 w-full py-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Check out
             </button>

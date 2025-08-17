@@ -44,6 +44,9 @@ export default function Checkout() {
           Total Amount:
           <span className="font-bold"> ${amount.toFixed(2)}</span>
         </h2>
+        {amount === 0 && (
+          <p className="text-red-500 font-bold mt-4">Cart is empty</p>
+        )}
       </div>
 
       {amount > 0 && (
